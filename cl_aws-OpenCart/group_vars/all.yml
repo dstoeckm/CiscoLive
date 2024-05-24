@@ -1,5 +1,0 @@
----
-DB_PASSWORD: "DusLab123!"
-my_db_user: "my_db_user"
-DB_PORT: "3306"
-DB_DATABASE: "opencart"
