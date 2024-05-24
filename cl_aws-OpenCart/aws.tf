@@ -51,9 +51,10 @@ resource "aws_db_instance" "opencart" {
   engine_version         = "10.11.6"
   instance_class         = "db.m5.large"
   name                   = "opencart"
-  username               = "my_db_user"
-  password               = "DusLab123!"
+  username               = var.db_user
+  password               = var.db_password
   port                   = "3306"
+  storage_encrypted      = true
   # parameter_group_name   = "default.mariadb10.5"
   skip_final_snapshot    = true
   # vpc_security_group_ids = [aws_security_group.rds.id]
