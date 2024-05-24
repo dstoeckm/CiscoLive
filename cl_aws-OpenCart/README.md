@@ -10,4 +10,4 @@ db_password = "your_secret_password"
 db_user     = "your_user"
 
 
-Upgradeing to AMZ Linux 2023 and /usr/bin/python 
+Change the group_vars/all.yml.sample to group_vars/all.yml and edit your changes
