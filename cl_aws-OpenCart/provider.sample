@@ -1,0 +1,28 @@
+// Providers //
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+    tetration = {
+      source  = "CiscoDevNet/tetration"
+      version = "0.1.1"
+    }
+  }
+}
+
+// Configure the AWS Provider
+provider "aws" {
+  region                  = "< region >"        ### stting the default region
+  shared_credentials_file = "< /path/to/file >" ### will be used for local aws credentials 
+  profile                 = "< profile-name>"   ### using as default profile
+}
+
+// Configure the tetration provider
+provider "tetration" {
+  api_key                  = "< api_key >"                            ### from API of Cisco Secure Workload  
+  api_secret               = "< api_secret >"                         ### from API of Cisco Secure Workload  
+  api_url                  = "https://< your_cluster_ip or FQDN>"     ### could be ether IP or FQDN
+  disable_tls_verification = true                                     ### needed for none public certificates
+}
