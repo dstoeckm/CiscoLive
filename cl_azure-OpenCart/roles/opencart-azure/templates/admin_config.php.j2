@@ -1,0 +1,42 @@
+<?php
+// APPLICATION
+define('APPLICATION', 'Admin');
+
+// HTTP
+define('HTTP_SERVER', 'http://{{ Web_Server }}/admin/');
+define('HTTP_CATALOG', 'http://{{ Web_Server }}/');
+define('HTTP_IMAGE', 'http://{{ Web_Server }}/image/');
+
+// HTTPS
+define('HTTPS_SERVER', 'http://{{ Web_Server }}/admin/');
+define('HTTPS_CATALOG', 'http://{{ Web_Server }}/');
+define('HTTPS_IMAGE', 'http://{{ Web_Server }}/image/');
+
+// DIR
+define('DIR_OPENCART', '/var/www/html/');
+define('DIR_APPLICATION', DIR_OPENCART . 'admin/');
+define('DIR_EXTENSION', DIR_OPENCART . 'extension/');
+define('DIR_IMAGE', DIR_OPENCART . 'image/');
+define('DIR_SYSTEM', DIR_OPENCART . 'system/');
+define('DIR_CATALOG', DIR_OPENCART . 'catalog/');
+define('DIR_STORAGE', DIR_SYSTEM . 'storage/');
+define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
+define('DIR_TEMPLATE', DIR_APPLICATION . 'view/template/');
+define('DIR_CONFIG', DIR_SYSTEM . 'config/');
+define('DIR_CACHE', DIR_STORAGE . 'cache/');
+define('DIR_DOWNLOAD', DIR_STORAGE . 'download/');
+define('DIR_LOGS', DIR_STORAGE . 'logs/');
+define('DIR_SESSION', DIR_STORAGE . 'session/');
+define('DIR_UPLOAD', DIR_STORAGE . 'upload/');
+
+// DB
+define('DB_DRIVER', 'mysqli');
+define('DB_HOSTNAME', '{{ SQL_Server }}');
+define('DB_USERNAME', '{{ my_db_user }}');
+define('DB_PASSWORD', '{{ DB_PASSWORD }}');
+define('DB_DATABASE', '{{ DB_DATABASE }}');
+define('DB_PORT', '3306');
+define('DB_PREFIX', 'oc_');
+
+// OpenCart API
+define('OPENCART_SERVER', 'https://www.opencart.com/');

@@ -15,6 +15,16 @@ variable "aws_access_key_id" {
   #  sensitive   = true
   default = {}
 }
+variable "db_password" {
+  description = "MariaDB password"
+    sensitive   = true
+  default = {}
+}
+variable "db_user" {
+  description = "MariaDB user"
+    sensitive   = true
+  default = {}
+}
 variable "aws_secret_access_key" {
   description = "AWS Secret Key"
   #  sensitive   = true

@@ -1,0 +1,185 @@
+---
+######################################################
+##     change hostname to opencart-web-front         #
+######################################################
+    
+    - name: Set a hostname
+    
+      ansible.builtin.hostname:
+        name: opencart-web-front
+######################################################
+##     push mcd cert for egress use case             #
+######################################################
+#
+#    - name: Deploy roles/opencart-aws/files/dlp01.sh
+#      template: src=roles/opencart-aws/files/dlp01.sh dest=/home/ec2-user/dlp01.sh mode=0777
+
+    - name: Make sure the folder exists (Red Hat)
+      file:
+        path: /etc/pki/ca-trust/source/anchors
+        state: directory
+
+    - name: Copy PEM into folder (Red Hat)
+      copy:
+        src: "roles/opencart-aws/files/valtixegress-ca.crt"
+        dest: "/etc/pki/tls/certs/valtixegress-ca.crt"
+      register: result
+
+    - name: Update CA Trust (Red Hat)
+      command: update-ca-trust
+      when: result is changed
+         - result is changed
+ 
+
+######################################################
+##     enable amzn epel release                      #
+######################################################
+
+    - name: Install amazon-linux-extras epel
+      shell: "amazon-linux-extras install -y epel"
+ 
+######################################################
+##     Block to install requirements                 #
+######################################################
+
+    - name: install OpenCart requirement Packages
+      yum:
+        name:
+           - httpd
+           - amazon-linux-extras
+           - php
+           - php-mysql
+           - php-gd
+           - php-ldap
+           - php-odbc
+           - php-pear
+           - php-xml
+           - php-xmlrpc
+           - php-mbstring
+           - php-snmp
+           - php-soap
+           - php-mcrypt
+           - mysql
+           - curl
+           - zlib
+           - unzip
+           - MySQL-python
+           - pip
+        state: present
+        update_cache: yes
+
+######################################################
+##     Block Update all packages                     #
+######################################################
+
+    - name: Upgrade all packages
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
+        
+######################################################
+##     Block start httpd                             #
+######################################################
+
+    - systemd: state=started name=httpd enabled=yes
+
+######################################################
+##     Block to download OpenCart                    #
+######################################################
+
+    - name: mkdir /tmp/opencart
+      file:
+       path: /tmp/opencart
+       state: directory
+       mode: 0777
+
+    - name: Download OpenCart zip file
+      unarchive:
+        src: https://github.com/opencart/opencart/archive/refs/tags/2.0.3.1.zip
+        dest: /tmp/opencart
+        remote_src: True
+        mode: 0777
+
+    - name: rsync files
+      command: rsync -Wag /tmp/opencart/opencart-2.0.3.1/upload/ /var/www/html/
+
+######################################################
+##     Block to test fresh installation not needed   #
+######################################################
+#    - name: write congfig.php for testing
+#      file:
+#       path: /var/www/html/admin/config.php
+#       state: touch
+#       mode: u+rwx,g+rwx,o+rwx
+#
+#    - name: write congfig.php for testing
+#      file:
+#       path: /var/www/html/config.php
+#       state: touch
+#       mode: u+rwx,g+rwx,o+rwx
+
+######################################################
+##     Push config.php templates                     #
+######################################################
+
+    - name: Deploy config.php from config.php.j2 Template
+      template: src=config.php.j2 dest=/var/www/html/config.php mode=0777
+
+    - name: Deploy /admin/config.php from adminconfig.php.j2 Template
+      template: src=adminconfig.php.j2 dest=/var/www/html/admin/config.php mode=0777
+
+######################################################
+##     Push sql DB to RDS                            #
+######################################################
+    - name: push SQL dumpfile
+      copy: src=opencart-dump.sql dest=/tmp
+
+    - name: Run SQL commands against DB to create table
+      mysql_db:
+        login_host: "{{ SQL_Server }}"
+        login_password: "{{ DB_PASSWORD }}"
+        login_user: "{{ my_db_user }}"
+        login_port: "{{ DB_PORT }}"
+        config_file: /etc/my.cnf
+        name: "{{ DB_DATABASE }}"
+        state: import
+        target: "/tmp/opencart-dump.sql"
+
+######################################################
+##     delete install dir                            #
+######################################################
+
+    - name: delete installation /dir/
+      file:
+       path: /var/www/html/install
+       state: absent
+      notify: restart httpd
+######################################################
+##     push .sh files for dlp testing                #
+######################################################
+
+    - name: Deploy roles/opencart-aws/files/dlp01.sh
+      template: src=roles/opencart-aws/files/dlp01.sh dest=/home/ec2-user/dlp01.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp02.sh
+      template: src=roles/opencart-aws/files/dlp02.sh dest=/home/ec2-user/dlp02.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp03.sh
+      template: src=roles/opencart-aws/files/dlp03.sh dest=/home/ec2-user/dlp03.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp04.sh
+      template: src=roles/opencart-aws/files/dlp04.sh dest=/home/ec2-user/dlp04.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp05.sh
+      template: src=roles/opencart-aws/files/dlp05.sh dest=/home/ec2-user/dlp05.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp06.sh
+      template: src=roles/opencart-aws/files/dlp06.sh dest=/home/ec2-user/dlp06.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp07.sh
+      template: src=roles/opencart-aws/files/dlp07.sh dest=/home/ec2-user/dlp07.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp08.sh
+      template: src=roles/opencart-aws/files/dlp08.sh dest=/home/ec2-user/dlp08.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/dlp089.sh
+      template: src=roles/opencart-aws/files/dlp09.sh dest=/home/ec2-user/dlp09.sh mode=0777
+    - name: Deploy roles/opencart-aws/files/demo_all.sh
+      template: src=roles/opencart-aws/files/demo_all.sh dest=/home/ec2-user/demo_all.sh mode=0777     
+
+  # - name: create x template
+  #  template: src={{ item }} dest=/tmp/{{ item | basename | regex_replace('.sh','') }}
+  #      with_fileglob:
+  #        - roles/opencart-aws/files/*.sh

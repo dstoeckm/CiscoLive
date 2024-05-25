@@ -1,0 +1,54 @@
+### REST API file for REST Client
+
+### GET Agent-ID for Amsterdam
+
+GET https://{{$EU}}/users
+X-Risk-Token: "JhT2EB-h4YpyTUr4E5xsyvipHXFTLhAi8cY9sb12gpQjTToaAtsp4x4y3_VKxPos$2a$06$WQjJIWyqJ8AcLwOAvwciTu"
+
+### GET Agent-ID for Amsterdam
+
+GET https://api.eu.kennasecurity.com/users
+X-Risk-Token: JhT2EB-h4YpyTUr4E5xsyvipHXFTLhAi8cY9sb12gpQjTToaAtsp4x4y3_VKxPos$2a$06$WQjJIWyqJ8AcLwOAvwciTu
+accept: "application/json"
+
+### GET Agent-ID for Amsterdam
+
+GET https://api.kennasecurity.com/vulnerabilities/100
+X-Risk-Token: "JhT2EB-h4YpyTUr4E5xsyvipHXFTLhAi8cY9sb12gpQjTToaAtsp4x4y3_VKxPos$2a$06$WQjJIWyqJ8AcLwOAvwciTu"
+
+### list connectors
+GET https://api.eu.kennasecurity.com/connectors 
+X-Risk-Token: "JhT2EB-h4YpyTUr4E5xsyvipHXFTLhAi8cY9sb12gpQjTToaAtsp4x4y3_VKxPos$2a$06$WQjJIWyqJ8AcLwOAvwciTu"
+accept: "application/json"
+
+### test curl from API doc page https://apidocs.kennasecurity.com/reference/upload-data-file 
+POST https://api.eu.kennasecurity.com/connectors/164488/data_file
+X-Risk-Token: JhT2EB-h4YpyTUr4E5xsyvipHXFTLhAi8cY9sb12gpQjTToaAtsp4x4y3_VKxPos$2a$06$WQjJIWyqJ8AcLwOAvwciTu
+accept: application/json
+content-type: multipart/form-data
+file=@kenna_csw.json
+
+### list user
+
+
+curl --request GET \
+     --url https://api.eu.kennasecurity.com/users \
+     --header 'X-Risk-Token: JhT2EB-h4YpyTUr4E5xsyvipHXFTLhAi8cY9sb12gpQjTToaAtsp4x4y3_VKxPos$2a$06$WQjJIWyqJ8AcLwOAvwciTu' \
+     --header 'accept: application/json'
+{
+      "id": 305533,
+      "created_at": "2022-04-27T11:58:58Z",
+      "updated_at": "2024-01-30T11:43:16Z",
+      "email": "dstoeckm+c65333@cisco.com",
+      "firstname": "Dirk",
+      "lastname": "Stoeckmann",
+      "phone": null,
+      "external_id": null,
+      "last_sign_in_at": "2024-01-30T11:43:16Z",
+      "roles": [
+        "administrator"
+      ],
+      "role_ids": [
+        120434
+      ]
+    },

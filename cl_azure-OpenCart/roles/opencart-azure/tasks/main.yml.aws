@@ -1,0 +1,77 @@
+---
+    - name: upgrade all packages
+      yum: name=* update_cache=yes state=latest
+
+    - name: install OpenCart requirement Packages
+      yum:
+        name:
+           - httpd
+           - epel-release
+           - php
+           - php-mysql
+           - php-gd
+           - php-ldap
+           - php-odbc
+           - php-pear
+           - php-xml
+           - php-xmlrpc
+           - php-mbstring
+           - php-snmp
+           - php-soap
+           - php-mcrypt
+           - mysql
+           - curl
+           - zlib
+           - unzip
+           - MySQL-python
+           - pip
+        state: present
+        update_cache: yes
+
+
+
+    - systemd: state=started name=httpd enabled=yes
+
+    - name: add folder
+      file:
+       path: /tmp/opencart
+       state: directory
+       mode: 0777
+
+    - name: Download OpenCart zip file
+      unarchive:
+        src: https://github.com/downloads/opencart/opencart/opencart_v1.5.4.1.zip
+        dest: /tmp/opencart
+        remote_src: True
+        mode: 0777
+
+    - name: rsync files
+      command: rsync -Wag /tmp/opencart/opencart_v1.5.4.1/upload/ /var/www/html/
+
+
+
+    - name: Deploy config.php from config.php.j2 Template
+      template: src=config.php.j2 dest=/var/www/html/config.php mode=0777
+
+    - name: Deploy /admin/config.php from adminconfig.php.j2 Template
+      template: src=adminconfig.php.j2 dest=/var/www/html/admin/config.php mode=0777
+
+#connection: local
+    - name: push SQL dumpfile
+      copy: src=opencart-dump.sql dest=/tmp
+
+    - name: Run SQL commands against DB to create table
+      mysql_db:
+        login_host: "{{ SQL_Server }}"
+        login_password: "{{ DB_PASSWORD }}"
+        login_user: "{{ my_db_user }}"
+        login_port: "{{ DB_PORT }}"
+        name: "{{ DB_DATABASE }}"
+        state: import
+        target: "/tmp/opencart-dump.sql"
+
+    - name: delete installation /dir/
+      file:
+       path: /var/www/html/install
+       state: absent
+      notify: restart httpd

@@ -1,0 +1,130 @@
+---
+#    - name: upgrade all packages
+#      yum: name=* update_cache=yes state=latest
+#    - name: install epel-release
+#      yum:
+#        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+#        state: present
+
+     - name: Installing Remi Repository
+       yum:
+        name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+        state: present
+
+     - name: install OpenCart requirement Packages
+       yum:
+        enablerepo: "remi,remi-php80" # If you intent to install a different version of PHP, you can change the repo according. Eg : "remi,remi-php74"
+        name:
+           - httpd
+           - php
+           - php-mysqlnd
+           - php-gd
+           - php-ldap
+           - php-odbc
+           - php-pear
+           - php-xml
+           - php-xmlrpc
+           - php-mbstring
+           - php-snmp
+           - php-soap
+           - php-mcrypt
+           - mysql
+           - curl
+           - zlib
+           - unzip
+           - python3-mysql #MySQL-python
+           - python2-pip
+           - python3-pip
+#           
+#           - php
+#           - php-common
+#           - php-cli
+#           - php-gd
+#           - php-curl #You can add or remove PHP extensions according to your choice
+#           - php-mysqlnd
+#           - php-fpm
+#           - php-mysqli
+        state: latest
+        update_cache: yes 
+        
+#
+#    - name: install REMI repo for PHP8
+#      dnf: 
+#        name: "https://rpms.remirepo.net/enterprise/remi-release-8.rpm"
+#        state: present
+#
+#    - name: install OpenCart requirement Packages
+#      yum:
+#        name:
+#           - httpd
+#           - php
+#           - php-mysqlnd
+#           - php-gd
+#           - php-ldap
+#           - php-odbc
+#           - php-pear
+#           - php-xml
+#           - php-xmlrpc
+#           - php-mbstring
+#           - php-snmp
+#           - php-soap
+##           - php-mcrypt
+#           - mysql
+#           - curl
+#           - zlib
+#           - unzip
+#           - python3-mysql #MySQL-python
+#           - python2-pip
+#           - python3-pip
+#        state: present
+#        update_cache: yes
+#
+  
+
+    - systemd: state=started name=httpd enabled=yes
+
+    - name: generate tmp directory
+      file:
+       path: /tmp/opencart
+       state: directory
+       mode: 0777
+
+    - name: Download OpenCart zip file
+      unarchive:
+        src: https://github.com/opencart/opencart/releases/download/4.0.1.1/opencart-4.0.1.1.zip
+        dest: /tmp/opencart
+        remote_src: True
+        mode: 0777
+
+    - name: rsync files
+      command: rsync -Wag /tmp/opencart/upload/ /var/www/html/
+ 
+
+
+#    - name: Deploy config.php from config.php.j2 Template
+#      template: src=config.php.j2 dest=/var/www/html/config.php mode=0777
+#
+#    - name: Deploy /admin/config.php from adminconfig.php.j2 Template
+#      template: src=adminconfig.php.j2 dest=/var/www/html/admin/config.php mode=0777
+#
+# #connection: local
+#     - name: push SQL dumpfile
+#       copy: src=opencart-dump.sql dest=/tmp
+#       
+#     - name: Run SQL commands against DB to create table
+#       mysql_db:
+#         login_host: "{{ SQL_Server }}"
+#         login_password: "{{ DB_PASSWORD }}"
+#         login_user: "{{ my_db_user }}"
+#         login_port: "{{ DB_PORT }}"
+#         name: "{{ DB_DATABASE }}"
+#         state: import
+#         target: "/tmp/opencart-dump.sql"
+#         config_file: ""
+# 
+#     - name: delete installation /dir/
+#       file:
+#        path: /var/www/html/install
+#        state: absent
+#       notify: restart httpd
+#     

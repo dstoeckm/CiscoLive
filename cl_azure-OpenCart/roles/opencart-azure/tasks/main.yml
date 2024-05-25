@@ -1,0 +1,143 @@
+---
+    - name: Wait 600 seconds for target connection to become reachable/usable
+      wait_for_connection:
+    
+#    - pause:
+#      minutes: 5
+      
+    - name: Disable selinux
+      ansible.posix.selinux: state=disabled
+    - name: Disable firewall
+      systemd: state=stopped name=firewalld enabled=no
+  
+    - name: install Remi RPM key for PHP
+      rpm_key:
+        key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2018
+        state: present
+
+    - name: Installing Remi Repository
+      dnf:
+       name: https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+       state: present
+
+    - name: reset php repo 
+      shell:
+          cmd: dnf module reset php -y 
+    - name: enable remi-php repo 
+      shell:
+          cmd: dnf module enable -y php:remi-{{ php_version }}  
+
+    - name: install OpenCart requirement Packages
+      yum:
+       name:
+          - httpd
+          - php
+          - php-mysqlnd
+          - php-gd
+          - php-ldap
+          - php-odbc
+          - php-pear
+          - php-xml
+          - php-xmlrpc
+          - php-mbstring
+          - php-snmp
+          - php-soap
+          - php-mcrypt
+          - php-zip 
+          - mysql
+          - curl
+          - zlib
+          - unzip
+          - python3-mysql 
+       state: latest
+       update_cache: yes 
+
+    - name: Upgrade all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - systemd: state=started name=httpd enabled=yes
+
+    - name: generate tmp directory
+      file:
+       path: /tmp/opencart
+       state: directory
+       mode: 0777
+
+    - name: Download OpenCart zip file
+      unarchive:
+        src: https://github.com/opencart/opencart/releases/download/4.0.1.1/opencart-4.0.1.1.zip
+        dest: /tmp/opencart
+        remote_src: True
+        mode: 0777
+
+    - name: rsync files
+      command: rsync -Wag /tmp/opencart/upload/ /var/www/html/
+
+    - name: Deploy config.php from config.php.j2 Template
+      template: 
+         src: config.php.j2 
+         dest: /var/www/html/config.php
+         mode: 0777
+         owner: apache
+         group: apache
+
+    - name: Deploy /admin/config.php from admin_config.php.j2 Template
+      template: 
+          src: admin_config.php.j2 
+          dest: /var/www/html/admin/config.php 
+          mode: 0777
+          owner: apache
+          group: apache
+
+    - name: push SQL dumpfile
+      copy: src=opencartdb-dump4AZ.sql dest=/home/azureuser
+    
+    - name: push shell script for DB config
+      template:
+          src: db01.sh.j2
+          dest: /home/azureuser/DB_user_create.sh
+          mode: 0777
+
+#
+# Because of the Azure DB firewall config in main.tf mysql command are not possible from the teraforem host!
+#
+
+#    - name: Run SQL commands against DB to create table
+#      mysql_db:
+#        login_host: "{{ SQL_Server }}"
+#        login_password: "{{ DB_PASSWORD }}"
+#        login_user: "{{ my_db_user }}"
+#        login_port: "{{ DB_PORT }}"
+#        name: "{{ DB_DATABASE }}"
+#        state: import
+#        use_shell: yes
+#        target: "/tmp/opencart-dump.sql"
+#    - name: Create database user with password and all database privileges and 'WITH GRANT OPTION'
+#      mysql_user:
+#        name: "my_db_user"
+#        password: test #"{{ DB_PASSWORD }}"
+#        priv: '*.*:ALL,GRANT'
+#        config_file: ""
+#        state: present
+        
+    - name: execute sqldump from VM
+      shell: /home/azureuser/DB_user_create.sh
+
+#    - name: delete DB shell script
+#      file: 
+#       path: /home/azureuser/DB_user_create.sh
+#       state: absent
+#
+ #   - name: delete DB dumpfile
+ #     file: 
+ #      path: /home/azureuser/opencartdb-dump4AZ.sql
+ #      state: absent
+#
+#    - name: delete installation /dir/
+#      file:
+#       path: /var/www/html/install
+#       state: absent
+#      notify: restart machine
+#

@@ -1,0 +1,10 @@
+---
+- hosts: "dashboard"
+  remote_user: "azureuser"
+  become: true
+  vars_files: group_vars/tf_ansible_vars_file.yml
+  
+  roles:
+#  - common
+#  - CreateUser
+  - opencart-azure
