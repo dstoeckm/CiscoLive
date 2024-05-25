@@ -76,7 +76,7 @@ resource "aws_db_instance" "opencart" {
 // secureity group to access RDS
 resource "aws_security_group" "rds" {
   name = "RDS_access"
-
+  description = "Allow DB traffic"
   ingress {
     from_port   = 3306
     to_port     = 3306
