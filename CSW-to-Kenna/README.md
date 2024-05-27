@@ -17,3 +17,5 @@ The same works for Cisco Vulnerability Management
 
 The result should look like this
 ![](pic/kenna3.gif)
+
+Change the credentials-sample.json firl to credentials.json and edit your API key.
