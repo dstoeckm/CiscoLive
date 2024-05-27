@@ -4,7 +4,7 @@ resource "aws_instance" "web-tier" {
   availability_zone           = "eu-central-1c"
   private_ip                  = "172.31.7.247"
   associate_public_ip_address = false
-  ebs_optimized               = false
+  ebs_optimized               = true
   instance_type               = "t2.micro"
   monitoring                  = false
   key_name                    = "terraform-mcd-key"
@@ -46,17 +46,19 @@ resource "aws_instance" "web-tier" {
 
 // Building AWS RDS "AWS-RDS" >> this can't be tagged here so the tetration.tf is doing this <<
 resource "aws_db_instance" "opencart" {
-  allocated_storage      = 20
-  engine                 = "mariadb"
-  engine_version         = "10.11.6"
-  instance_class         = "db.m5.large"
-  name                   = "opencart"
-  username               = var.db_user
-  password               = var.db_password
-  port                   = "3306"
-  storage_encrypted      = true
-  # parameter_group_name   = "default.mariadb10.5"
-  skip_final_snapshot    = true
+  allocated_storage          = 20
+  engine                     = "mariadb"
+  engine_version             = "10.11.6"
+  instance_class             = "db.m5.large"
+  name                       = "opencart"
+  username                   = var.db_user
+  password                   = var.db_password
+  port                       = "3306"
+  storage_encrypted          = true
+  # parameter_group_name      = "default.mariadb10.5"
+  skip_final_snapshot        = true
+  copy_tags_to_snapshot      = true
+  auto_minor_version_upgrade = true
   # vpc_security_group_ids = [aws_security_group.rds.id]
   # vpc_security_group_ids = ["${aws_security_group.web-tier.id}"]
 
@@ -78,6 +80,7 @@ resource "aws_security_group" "rds" {
   name = "RDS_access"
   description = "Allow DB traffic"
   ingress {
+    description = "Allow access to DB from CIDR 172.31.0.0/20 only"
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
